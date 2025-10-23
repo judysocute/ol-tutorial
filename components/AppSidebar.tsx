@@ -1,4 +1,12 @@
-import { Calendar, Home, Inbox, Search, Settings, ScanEye } from "lucide-react";
+import {
+  ScanEye,
+  Fullscreen,
+  RulerDimensionLine,
+  Locate,
+  MapPlus,
+} from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Sidebar,
   SidebarContent,
@@ -9,41 +17,38 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
 } from "@/components/ui/sidebar";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 const items = [
   {
+    id: "zoomSlider",
     title: "Zoom Slider",
     turnOn: false,
     icon: ScanEye,
   },
   {
-    title: "Inbox",
+    id: "scaleLine",
+    title: "Scale Line",
     turnOn: false,
-    icon: Inbox,
+    icon: RulerDimensionLine,
   },
   {
-    title: "Calendar",
+    id: "fullScreen",
+    title: "Full Screen Button",
     turnOn: false,
-    icon: Calendar,
+    icon: Fullscreen,
   },
   {
-    title: "Search",
+    id: "mousePosition",
+    title: "Mouse Position",
     turnOn: false,
-    icon: Search,
+    icon: Locate,
   },
   {
-    title: "Settings",
+    id: "overviewMap",
+    title: "Map Overview",
     turnOn: false,
-    icon: Settings,
+    icon: MapPlus,
   },
 ];
 
@@ -57,13 +62,18 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                <SidebarMenuItem
+                  key={item.id}
+                  className="flex items-center space-x-2"
+                >
+                  <Switch id={item.id}></Switch>
+                  <Label htmlFor={item.id}>{item.title}</Label>
+                  {/* <SidebarMenuButton asChild>
                     <a href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
                     </a>
-                  </SidebarMenuButton>
+                  </SidebarMenuButton> */}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

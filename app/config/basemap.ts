@@ -1,5 +1,4 @@
 import TileLayer from "ol/layer/Tile";
-import Layer from "ol/layer/Layer";
 import OSM from "ol/source/OSM";
 import XYZ from "ol/source/XYZ";
 import { Tile } from "ol/source";
