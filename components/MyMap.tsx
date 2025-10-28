@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import {
   ZoomSlider,
   ScaleLine,
@@ -17,7 +17,9 @@ import XYZ from "ol/source/XYZ";
 // import TileSource from "ol/layer";
 import { register } from "ol/proj/proj4";
 import proj4 from "proj4";
-import mapLayers from "@/app/config/basemap";
+import { configBasemap } from "@/app/config/basemap";
+import { Tile } from "ol/source";
+import OSM from "ol/source/OSM";
 
 proj4.defs([
   // 羅賓森投影
@@ -55,47 +57,60 @@ export default function MyMap({
   const mousePositionRef = useRef<HTMLDivElement>(null);
   // OpenLayers Map 實例的 ref
   const mapInstanceRef = useRef<Map | null>(null);
+  const mapLayers = useMemo<TileLayer[]>(() => {
+    return configBasemap.map((item) => {
+      return new TileLayer({
+        source: item.urls[0].name,
+        opacity: item.opacity,
+        visible: item.initVisible,
+        properties: {
+          id: item.id,
+          name: item.name,
+          image: item.image,
+        },
+      });
+    });
+  }, []);
 
   function addZoomsliderContro() {
-    addControl(new ZoomSlider());
+    const control = new ZoomSlider();
+    control.setProperties({ id: "zoomSlider" });
+    addControl(control);
   }
 
   function addScaleLineControl() {
-    addControl(new ScaleLine({ units: "metric" }));
+    const control = new ScaleLine({ units: "metric" });
+    control.setProperties({ id: "scaleLine" });
+    addControl(control);
   }
 
   function addFullScreenControl() {
-    addControl(new FullScreen());
+    const control = new FullScreen();
+    control.setProperties({ id: "fullScreen" });
+    addControl(control);
   }
 
   function addMousePositionControl() {
-    addControl(
-      new MousePosition({
-        coordinateFormat: createStringXY(4),
-        projection: "EPSG:4326",
-        className: "custom-mouse-position",
-        target: mousePositionRef.current!,
-      })
-    );
+    const control = new MousePosition({
+      coordinateFormat: createStringXY(4),
+      projection: "EPSG:4326",
+      className: "custom-mouse-position",
+      target: mousePositionRef.current!,
+    });
+    control.setProperties({ id: "mousePosition" });
+    addControl(control);
   }
 
   function addOverViewControl() {
-    addControl(
-      new OverviewMap({
-        className: "ol-overviewmap ol-custom-overviewmap",
-        layers: [
-          new TileLayer({
-            source: new XYZ({
-              url: "https://wmts.nlsc.gov.tw/wmts/PHOTO2/default/GoogleMapsCompatible/{z}/{y}/{x}",
-              wrapX: false,
-            }),
-          }),
-        ],
-        collapseLabel: "\u00BB",
-        label: "\u00AB",
-        collapsed: false,
-      })
-    );
+    const control = new OverviewMap({
+      className: "ol-overviewmap ol-custom-overviewmap",
+      layers: mapLayers,
+      collapseLabel: "\u00BB",
+      label: "\u00AB",
+      collapsed: false,
+    });
+    control.setProperties({ id: "overviewMap" });
+    addControl(control);
   }
 
   function addControl(control: Control) {
@@ -116,7 +131,24 @@ export default function MyMap({
 
     const map = new Map({
       target: mapContainerRef.current!,
-      layers: mapLayers,
+      layers: configBasemap.map((item) => {
+        return new TileLayer({
+          source: item.urls[0].name,
+          opacity: item.opacity,
+          visible: item.initVisible,
+          properties: {
+            id: item.id,
+            name: item.name,
+            image: item.image,
+          },
+        });
+      }),
+      // layers: [...mapLayers],
+      // layers: [
+      //   new TileLayer({
+      //     source: new OSM(),
+      //   }),
+      // ],
       view: new View({
         projection: projection,
         center: [0, 0], //
@@ -124,23 +156,10 @@ export default function MyMap({
       }),
     });
 
-    // addZoomsliderContro();
-    // addScaleLineControl(map);
-    // addFullScreenControl(map);
-    // addMousePositionControl(map);
-    // addOverViewControl(map);
-    // map.addControl(zoomsliderControl);
-    // map.addControl(scaleLineControl);
-    // map.addControl(fullScreenControl);
-    // map.addControl(mousePositionControl);
-    // map.addControl(overviewMapControl);
-    // map.removeControl(zoomsliderControl);
-
     mapInstanceRef.current = map;
 
     return () => {
       if (mapInstanceRef.current) {
-        console.log("clear");
         mapInstanceRef.current.setTarget(undefined);
         mapInstanceRef.current = null;
       }
@@ -177,7 +196,24 @@ export default function MyMap({
         </a>
         <div ref={mousePositionRef} className="text-sm font-bold"></div>
       </div>
-      <button onClick={addZoomsliderContro}>test</button>
+      <button
+        onClick={() => {
+          addZoomsliderContro();
+          addScaleLineControl();
+          addFullScreenControl();
+          addMousePositionControl();
+          addOverViewControl();
+          addOverViewControl();
+          mapInstanceRef.current
+            ?.getControls()
+            .getArray()
+            .forEach((control) => {
+              console.log(control.getProperties());
+            });
+        }}
+      >
+        Enable
+      </button>
     </div>
   );
 }
