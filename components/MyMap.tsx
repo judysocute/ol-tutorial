@@ -104,7 +104,21 @@ export default function MyMap({
   function addOverViewControl() {
     const control = new OverviewMap({
       className: "ol-overviewmap ol-custom-overviewmap",
-      layers: mapLayers,
+      layers: [
+        new TileLayer({
+          source: new XYZ({
+            url: "https://wmts.nlsc.gov.tw/wmts/PHOTO2/default/GoogleMapsCompatible/{z}/{y}/{x}",
+            wrapX: true,
+          }),
+          opacity: 1,
+          visible: true,
+          properties: {
+            id: "Taiwan_Orthophoto",
+            name: "臺灣正射影像圖(通用版)",
+            image: "Taiwan_Orthophoto.png",
+          },
+        }),
+      ],
       collapseLabel: "\u00BB",
       label: "\u00AB",
       collapsed: false,
@@ -131,24 +145,7 @@ export default function MyMap({
 
     const map = new Map({
       target: mapContainerRef.current!,
-      layers: configBasemap.map((item) => {
-        return new TileLayer({
-          source: item.urls[0].name,
-          opacity: item.opacity,
-          visible: item.initVisible,
-          properties: {
-            id: item.id,
-            name: item.name,
-            image: item.image,
-          },
-        });
-      }),
-      // layers: [...mapLayers],
-      // layers: [
-      //   new TileLayer({
-      //     source: new OSM(),
-      //   }),
-      // ],
+      layers: mapLayers,
       view: new View({
         projection: projection,
         center: [0, 0], //
@@ -203,13 +200,12 @@ export default function MyMap({
           addFullScreenControl();
           addMousePositionControl();
           addOverViewControl();
-          addOverViewControl();
-          mapInstanceRef.current
-            ?.getControls()
-            .getArray()
-            .forEach((control) => {
-              console.log(control.getProperties());
-            });
+          // mapInstanceRef.current
+          //   ?.getControls()
+          //   .getArray()
+          //   .forEach((control) => {
+          //     console.log(control.getProperties());
+          //   });
         }}
       >
         Enable
